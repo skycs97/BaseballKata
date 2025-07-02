@@ -39,6 +39,11 @@ TEST_F(BaseballFixture, Check_2_Strike_0_Ball) {
 	checkGuessResult(expected, "124");
 }
 
+TEST_F(BaseballFixture, Check_1_Strike_2_Ball) {
+	GuessResult expected = { false, 1, 2 };
+	checkGuessResult(expected, "321");
+}
+
 int main(void) {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
