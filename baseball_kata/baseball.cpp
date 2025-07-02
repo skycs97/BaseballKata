@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <ctype.h>
 
 using namespace std;
 
@@ -11,6 +12,48 @@ struct GuessResult {
 class Baseball {
 private:
 	string question;
+	constexpr static int QUESTION_LEN = 3;
+
+	bool isAnswer(const std::string& guessNumber)
+	{
+		return question == guessNumber;
+	}
+
+	bool isDuplicatedNumber(const std::string& guessNumber)
+	{
+		return (guessNumber[0] == guessNumber[1]
+			|| guessNumber[0] == guessNumber[2]
+			|| guessNumber[1] == guessNumber[2]);
+	}
+
+	int checkStrikes(const std::string& guessNumber)
+	{
+		int strikeCnt = 0;
+
+		for (int question_idx = 0; question_idx < QUESTION_LEN; ++question_idx) {
+			if (question[question_idx] == guessNumber[question_idx]) {
+				strikeCnt++;
+			}
+		}
+
+		return strikeCnt;
+	}
+
+	int checkBalls(const std::string& guessNumber) {
+		int ballCnt = 0;
+
+		for (int question_idx = 0; question_idx < QUESTION_LEN; ++question_idx) {
+			for (int guess_idx = 0; guess_idx < QUESTION_LEN; ++guess_idx) {
+				if (question_idx == guess_idx) continue;
+
+				if (question[question_idx] == guessNumber[guess_idx]) {
+					ballCnt++;
+				}
+			}
+		}
+
+		return ballCnt;
+	}
 public:
 	Baseball(const string& question)
 		: question(question)
@@ -18,32 +61,27 @@ public:
 	}
 	GuessResult guess(const string& guessNumber) {
 		assertIllegalArgument(guessNumber);
-		if (guessNumber == question) {
-			return { true, 3, 0 };
-		}
 
-		return { false, 0, 0 };
-
+		return {
+			isAnswer(guessNumber),
+			checkStrikes(guessNumber),
+			checkBalls(guessNumber),
+		};
 	}
+
 	void assertIllegalArgument(const std::string& guessNumber)
 	{
-		if (guessNumber.length() != 3) {
+		if (guessNumber.length() != QUESTION_LEN) {
 			throw length_error("Must be three letters.");
 		}
 
 		for (char ch : guessNumber) {
-			if (ch >= '0' && ch <= '9') continue;
+			if (isdigit(ch)) continue;
 			throw invalid_argument("Must be number");
 		}
 
 		if (isDuplicatedNumber(guessNumber)) {
 			throw invalid_argument("Mut not have the same number");
 		}
-	}
-	bool isDuplicatedNumber(const std::string& guessNumber)
-	{
-		return (guessNumber[0] == guessNumber[1]
-			|| guessNumber[0] == guessNumber[2]
-			|| guessNumber[1] == guessNumber[2]);
 	}
 };
