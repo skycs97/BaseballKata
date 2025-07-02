@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <ctype.h>
 
 using namespace std;
 
@@ -12,6 +13,47 @@ class Baseball {
 private:
 	string question;
 	constexpr static int QUESTION_LEN = 3;
+
+	bool isAnswer(const std::string& guessNumber)
+	{
+		return question == guessNumber;
+	}
+
+	bool isDuplicatedNumber(const std::string& guessNumber)
+	{
+		return (guessNumber[0] == guessNumber[1]
+			|| guessNumber[0] == guessNumber[2]
+			|| guessNumber[1] == guessNumber[2]);
+	}
+
+	int checkStrikes(const std::string& guessNumber)
+	{
+		int strikeCnt = 0;
+
+		for (int question_idx = 0; question_idx < QUESTION_LEN; ++question_idx) {
+			if (question[question_idx] == guessNumber[question_idx]) {
+				strikeCnt++;
+			}
+		}
+
+		return strikeCnt;
+	}
+
+	int checkBalls(const std::string& guessNumber) {
+		int ballCnt = 0;
+
+		for (int question_idx = 0; question_idx < QUESTION_LEN; ++question_idx) {
+			for (int guess_idx = 0; guess_idx < QUESTION_LEN; ++guess_idx) {
+				if (question_idx == guess_idx) continue;
+
+				if (question[question_idx] == guessNumber[guess_idx]) {
+					ballCnt++;
+				}
+			}
+		}
+
+		return ballCnt;
+	}
 public:
 	Baseball(const string& question)
 		: question(question)
@@ -19,35 +61,14 @@ public:
 	}
 	GuessResult guess(const string& guessNumber) {
 		assertIllegalArgument(guessNumber);
-		
-		bool solved = false;
-		int strike = 0;
-		int ball = 0;
 
-		for (int idx = 0; idx < QUESTION_LEN; ++idx) {
-			if (question[idx] == guessNumber[idx]) {
-				strike++;
-			}
-		}
-
-		if (strike == QUESTION_LEN) {
-			solved = true;
-		}
-		else {
-			for (int a = 0; a < QUESTION_LEN; ++a) {
-				for (int b = 0; b < QUESTION_LEN; ++b) {
-					if (a == b) continue;
-
-					if (question[a] == guessNumber[b]) {
-						ball++;
-					}
-				}
-			}
-		}
-
-		return { solved, strike, ball };
-
+		return {
+			isAnswer(guessNumber),
+			checkStrikes(guessNumber),
+			checkBalls(guessNumber),
+		};
 	}
+
 	void assertIllegalArgument(const std::string& guessNumber)
 	{
 		if (guessNumber.length() != QUESTION_LEN) {
@@ -55,18 +76,12 @@ public:
 		}
 
 		for (char ch : guessNumber) {
-			if (ch >= '0' && ch <= '9') continue;
+			if (isdigit(ch)) continue;
 			throw invalid_argument("Must be number");
 		}
 
 		if (isDuplicatedNumber(guessNumber)) {
 			throw invalid_argument("Mut not have the same number");
 		}
-	}
-	bool isDuplicatedNumber(const std::string& guessNumber)
-	{
-		return (guessNumber[0] == guessNumber[1]
-			|| guessNumber[0] == guessNumber[2]
-			|| guessNumber[1] == guessNumber[2]);
 	}
 };
