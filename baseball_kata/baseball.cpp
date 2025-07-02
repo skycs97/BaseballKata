@@ -11,6 +11,7 @@ struct GuessResult {
 class Baseball {
 private:
 	string question;
+	constexpr static int QUESTION_LEN = 3;
 public:
 	Baseball(const string& question)
 		: question(question)
@@ -19,28 +20,25 @@ public:
 	GuessResult guess(const string& guessNumber) {
 		assertIllegalArgument(guessNumber);
 		
+		bool solved = false;
 		int strike = 0;
 
-		if (guessNumber == question) {
-			return { true, 3, 0 };
-		}
-		
-		if (question[0] == guessNumber[0]) {
-			strike++;
-		}
-		if (question[1] == guessNumber[1]) {
-			strike++;
-		}
-		if (question[2] == guessNumber[2]) {
-			strike++;
+		for (int idx = 0; idx < QUESTION_LEN; ++idx) {
+			if (question[idx] == guessNumber[idx]) {
+				strike++;
+			}
 		}
 
-		return { false, strike, 0 };
+		if (strike == QUESTION_LEN) {
+			solved = true;
+		}
+
+		return { solved, strike, 0 };
 
 	}
 	void assertIllegalArgument(const std::string& guessNumber)
 	{
-		if (guessNumber.length() != 3) {
+		if (guessNumber.length() != QUESTION_LEN) {
 			throw length_error("Must be three letters.");
 		}
 
